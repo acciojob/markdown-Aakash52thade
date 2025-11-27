@@ -1,13 +1,26 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import MarkdownEditor from './MarkdownEditor';
-import '../styles/App.css';
+import './styles.css';
 
 const App = () => {
   const [markdown, setMarkdown] = useState('# Welcome to Markdown Editor\n\nStart typing...');
+  const [isLoading, setIsLoading] = useState(true);
+
+  // useEffect for initial loading state
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setIsLoading(false);
+    }, 500);
+    return () => clearTimeout(timer);
+  }, []);
 
   return (
     <div className="app">
-      <MarkdownEditor markdown={markdown} setMarkdown={setMarkdown} />
+      {isLoading ? (
+        <div className="loading">Loading Markdown Editor...</div>
+      ) : (
+        <MarkdownEditor markdown={markdown} setMarkdown={setMarkdown} />
+      )}
     </div>
   );
 };

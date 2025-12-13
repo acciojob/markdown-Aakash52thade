@@ -6,12 +6,10 @@ const App = () => {
   const [markdown, setMarkdown] = useState('# Welcome to Markdown Editor\n\nStart typing...');
   const [isLoading, setIsLoading] = useState(true);
 
-  // useEffect for initial loading state
+  // initial loading state (assignment requires loading indicator)
   useEffect(() => {
-    const timer = setTimeout(() => {
-      setIsLoading(false);
-    }, 500);
-    return () => clearTimeout(timer);
+    const t = setTimeout(() => setIsLoading(false), 500);
+    return () => clearTimeout(t);
   }, []);
 
   return (

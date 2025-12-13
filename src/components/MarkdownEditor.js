@@ -1,61 +1,53 @@
-import React, { useState, useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 
 const MarkdownEditor = ({ markdown, setMarkdown }) => {
-  const [htmlOutput, setHTMLOutput] = useState("");
-  const [isProcessing, setIsProcessing] = useState(false);
+  const [htmlOutput, setHtmlOutput] = useState('');
 
+  // Convert markdown -> basic HTML immediately when markdown changes
   useEffect(() => {
-    setIsProcessing(true);
-    
-    const processMarkdown = () => {
-      let html = markdown
-        // Headers
+    const convert = (md) => {
+      if (!md) return '<p>Start typing markdown...</p>';
+
+      // Basic replacements (headings, bold, italic, links, paragraphs & line breaks)
+      let html = md
         .replace(/^### (.+$)/gim, '<h3>$1</h3>')
         .replace(/^## (.+$)/gim, '<h2>$1</h2>')
         .replace(/^# (.+$)/gim, '<h1>$1</h1>')
-        // Bold and Italic
         .replace(/\*\*(.*?)\*\*/gim, '<strong>$1</strong>')
         .replace(/\*(.*?)\*/gim, '<em>$1</em>')
-        // Links
-        .replace(/\[([^\]]+)\]\(([^)]+)\)/gim, '<a href="$2">$1</a>')
-        // Line breaks
-        .replace(/\n/g, '<br />');
-      
-      return html || '<p>Start typing markdown...</p>';
+        .replace(/\[([^\]]+)\]\(([^)]+)\)/gim, '<a href="$2">$1</a>');
+
+      // Split into paragraphs on two-or-more newlines, preserve single line breaks inside paragraphs
+      const paragraphs = html.split(/\n{2,}/).map(p => {
+        const withLineBreaks = p.replace(/\n/g, '<br />');
+        return `<p>${withLineBreaks}</p>`;
+      });
+
+      return paragraphs.join('');
     };
 
-    const timer = setTimeout(() => {
-      setHTMLOutput(processMarkdown());
-      setIsProcessing(false);
-    }, 100);
-
-    return () => clearTimeout(timer);
+    setHtmlOutput(convert(markdown));
   }, [markdown]);
 
-  const handleInputChange = (e) => {
-    setMarkdown(e.target.value);
-  };
+  const handleChange = (e) => setMarkdown(e.target.value);
 
   return (
-    <div className="markdown-editor">
-      <div className="input-panel">
-        <textarea 
+    <div className="editor-container">
+      <div className="input-section">
+        <textarea
           className="textarea"
           value={markdown}
-          onChange={handleInputChange}
+          onChange={handleChange}
           placeholder="Enter your markdown here..."
         />
       </div>
-      
-      <div className="preview-panel">
-        {isProcessing ? (
-          <div className="loading">Rendering preview...</div>
-        ) : (
-          <div 
-            className="preview"
-            dangerouslySetInnerHTML={{ __html: htmlOutput }}
-          />
-        )}
+
+      <div className="preview-section">
+        {/* Always render the preview element (tests expect .preview to exist) */}
+        <div
+          className="preview"
+          dangerouslySetInnerHTML={{ __html: htmlOutput }}
+        />
       </div>
     </div>
   );
